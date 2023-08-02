@@ -24,10 +24,14 @@
   - [[#all-the-icons][ALL THE ICONS]]
   - [[#moodline][Moodline]]
   - [[#rainbow-mode][Rainbow Mode]]
+  - [[#rainbow-delimiters][Rainbow Delimiters]]
+  - [[#indent-highlight][Indent Highlight]]
+  - [[#screenshot][Screenshot]]
 - [[#org-mode][ORG MODE]]
   - [[#toc][TOC]]
-  - [[#org-bullets][Org Bullets]]
+  - [[#org-cliplink][Org Cliplink]]
   - [[#org-superstar][Org Superstar]]
+  - [[#org-fancy-priorities][Org Fancy Priorities]]
   - [[#disable-electric-indent][Disable Electric Indent]]
   - [[#better-quoteblocks][Better Quoteblocks]]
 - [[#vertico--consult][Vertico & Consult]]
@@ -42,11 +46,13 @@
 - [[#project-management][Project Management]]
   - [[#projectile][Projectile]]
   - [[#magit][Magit]]
+  - [[#undotree][Undotree]]
   - [[#dired][Dired]]
   - [[#neotree][NEOTREE]]
 - [[#language-support][Language Support]]
   - [[#flycheck][Flycheck]]
   - [[#lsp-mode][LSP Mode]]
+  - [[#code-formatter][Code Formatter]]
   - [[#yasnippet][Yasnippet]]
   - [[#lsp-optimization][LSP Optimization]]
   - [[#python][Python]]
@@ -107,6 +113,7 @@
   (setq evil-want-keybinding nil)
   (setq evil-vsplit-window-right t)
   (setq evil-split-window-below t)
+  (setq evil-undo-system 'undo-tree)
   (evil-mode))
 (use-package evil-collection
   :after evil
@@ -118,10 +125,13 @@
 
 ** Basic Keybindings
 #+begin_src emacs-lisp
-(global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 (use-package general
   :config
   (general-evil-setup)
+
+  (general-define-key ;; Just a better way to escape stuff
+    "<escape>" 'keyboard-escape-quit)  
+
   (general-create-definer angl/leader-keys
      :states '(normal insert visual emacs)
      :keymaps 'override
@@ -149,6 +159,7 @@
 
   (angl/leader-keys
     "m" '(:ignore t :wk "Org")
+    "mc" '(org-cliplink :wk "Org cliplink")
     "ma" '(org-agenda :wk "Org agenda")
     "me" '(org-export-dispatch :wk "Org export dispatch")
     "mi" '(org-toggle-item :wk "Org toggle item")
@@ -199,6 +210,10 @@
     "wL" '(buf-move-left :wk "Buffer move right"))
 
   (angl/leader-keys
+    "p" '(:ignore t :wk "Projects")
+    "pm" '(magit :wk "Open Magit"))
+
+  (angl/leader-keys
     "e" '(:ignore t :wk "Evaluate")
     "eb" '(eval-buffer :wk "Evaluate elips in buffer")
     "ed" '(eval-defun :wk "Evaluate defun in or after point")
@@ -215,17 +230,17 @@
   (which-key-mode 1)
   :config
   (setq which-key-side-window-location 'bottom
- which-key-sort-order #'which-key-key-order-alpha
- which-key-sort-uppercase-first nil
- which-key-add-column-padding 1
- which-key-max-display-columns nil
- which-key-min-display-lines 6
- which-key-side-window-slot -10
- which-key-side-window-max-height 0.25
- which-key-idle-delay 0.8
- which-key-max-description-lenght 25
- which-key-allow-imprecise-window-fit nil
- which-key-separator " → " ))
+        which-key-sort-order #'which-key-key-order-alpha
+        which-key-sort-uppercase-first nil
+        which-key-add-column-padding 1
+        which-key-max-display-columns nil
+        which-key-min-display-lines 6
+        which-key-side-window-slot -10
+        which-key-side-window-max-height 0.25
+        which-key-idle-delay 0.8
+        which-key-max-description-lenght 25
+        which-key-allow-imprecise-window-fit nil
+        which-key-separator " → " ))
 #+end_src
 
 ** SUDO EDIT
@@ -257,7 +272,7 @@
 
 ** Transparency
 #+begin_src emacs-lisp
-;;(add-to-list 'default-frame-alist '(alpha-background . 90))
+(add-to-list 'default-frame-alist '(alpha-background . 90))
 ;; ADD THIS WHEN YOU UPDATE TO EMACS 29
 #+end_src
 
@@ -270,13 +285,11 @@
     (setq dashboard-set-heading-icons t)
     (setq dashboard-set-file-icons t)
     (setq dashboard-banner-logo-title "A man's Emacs is his castle...")
-    (setq dashboard-startup-banner "~/.config/emacs/images/KEC_Dark_BK.png")
+    ;(setq dashboard-startup-banner "~/.config/emacs/images/KEC_Dark_BK.png")
+    (setq dashboard-startup-banner "~/.config/emacs/images/angelmacs-banner.txt")
     (setq dashboard-center-content t)
-    (setq dashboard-items '((recents . 5)
-                            (agenda . 5)
-                            (bookmarks . 3)
-                            (projects . 3)
-                            (registers . 3)))
+    (setq dashboard-items '((recents . 3)
+                            (projects . 3)))
     :config
     (dashboard-setup-startup-hook))
 #+end_src
@@ -438,6 +451,30 @@
     :hook org-mode prog-mode)
 #+end_src
 
+** Rainbow Delimiters
+#+begin_src emacs-lisp
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+#+end_src
+
+** Indent Highlight
+#+begin_src emacs-lisp
+(use-package highlight-indent-guides
+  :custom
+  (highlight-indent-guides-delay 0)
+  (highlight-indent-guides-responsive t)
+  (highlight-indent-guides-method 'bitmap)
+  ;; (highlight-indent-guides-auto-enabled t)
+  ;; (highlight-indent-guides-character ?\┆)
+  :commands highlight-indent-guides-mode
+  :hook (prog-mode  . highlight-indent-guides-mode))
+#+end_src
+
+** Screenshot
+#+begin_src emacs-lisp
+(elpaca (screenshot :host github :repo "tecosaur/screenshot"))
+#+end_src
+
 * ORG MODE
 ** TOC
 #+begin_src emacs-lisp
@@ -446,11 +483,9 @@
   :init (add-hook 'org-mode-hook 'toc-org-enable))
 #+end_src
 
-** Org Bullets
+** Org Cliplink
 #+begin_src emacs-lisp
-(add-hook 'org-mode-hook 'org-indent-mode)
-(use-package org-bullets)
-(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+(elpaca (org-cliplink :host github :repo "rexim/org-cliplink"))
 #+end_src
 
 ** Org Superstar
@@ -463,6 +498,17 @@
 (setq org-hide-leading-stars nil)
 (setq org-superstar-leading-bullet ?\s)
 (setq org-indent-mode-turns-on-hiding-stars nil)
+(add-hook 'org-mode-hook 'org-indent-mode)
+#+end_src
+
+** Org Fancy Priorities
+#+begin_src emacs-lisp
+(use-package org-fancy-priorities
+  :ensure t
+  :hook
+  (org-mode . org-fancy-priorities-mode)
+  :config
+  (setq org-fancy-priorities-list '("⚠" "‼" "❗")))
 #+end_src
 
 ** Disable Electric Indent
@@ -474,6 +520,10 @@
 ** Better Quoteblocks
 #+begin_src emacs-lisp
 (require 'org-tempo)
+(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+(add-to-list 'org-structure-template-alist '("py" . "src python"))
+(add-to-list 'org-structure-template-alist '("s" . "src"))
 #+end_src
 
 * Vertico & Consult
@@ -530,7 +580,7 @@
     :ensure t
     :bind (("C-s" . consult-line)
            ("C-M-l" . consult-imenu)
-           ("C-M-j" . persp-switch-to-buffer*)
+           ("C-M-j" . consult-buffer)
            ("C-c M-x" . consult-mode-command)
            ("C-c h" . consult-history)
            ("C-c k" . consult-kmacro)
@@ -689,23 +739,36 @@
 (use-package magit)
 #+end_src
 
+** Undotree
+#+begin_src emacs-lisp
+(use-package undo-tree
+  :bind ("C-x u" . undo-tree-visualize)
+  :init (global-undo-tree-mode))
+#+end_src
+
 ** Dired
 #+begin_src emacs-lisp
 (use-package dired-open
   :config
   (setq dired-open-extensions '(("gif" . "sxiv")
-				("jpg" . "sxiv")
-				("png" . "sxiv")
-				("mkv" . "mpv")
-				("mp4" . "mpv"))))
+				    ("jpg" . "sxiv")
+				    ("png" . "sxiv")
+				    ("mkv" . "mpv")
+				    ("mp4" . "mpv"))))
 (use-package peep-dired
   :after dired
   :hook (evil-normalize-keymaps . peep-dired-hook)
   :config 
-    (evil-define-key 'normal dired-mode-map (kbd "h") 'dired-up-directory)
-    (evil-define-key 'normal dired-mode-map (kbd "l") 'dired-open-file)
-    (evil-define-key 'normal peep-dired-mode-map (kbd "j") 'peep-dired-next-file)
-    (evil-define-key 'normal peep-dired-mode-map (kbd "k") 'peep-dired-prev-file))
+    (general-define-key
+      :states 'normal
+      :keymaps dired-mode-map
+      "h" 'dired-up-directory
+      "l" 'dired-open-file)
+    (general-define-key
+      :states 'normal
+      :keymaps peep-dired-mode-map
+      "j" 'peep-dired-next-file
+      "k" 'peep-dired-prev-file))
 #+end_src
 
 ** NEOTREE
@@ -761,6 +824,13 @@
   :hook (lsp-mode . lsp-ui-mode)
   :custom
   (lsp-ui-doc-position 'bottom))
+#+end_src
+
+** Code Formatter
+#+begin_src emacs-lisp
+(use-package apheleia
+  :init
+  (apheleia-global-mode +1))
 #+end_src
 
 ** Yasnippet
