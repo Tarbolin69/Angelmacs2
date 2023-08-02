@@ -34,6 +34,7 @@
   - [[#org-fancy-priorities][Org Fancy Priorities]]
   - [[#disable-electric-indent][Disable Electric Indent]]
   - [[#better-quoteblocks][Better Quoteblocks]]
+- [[#org-roam][Org Roam]]
 - [[#vertico--consult][Vertico & Consult]]
   - [[#orderless][Orderless]]
   - [[#vertico-stuff][Vertico stuff]]
@@ -55,6 +56,7 @@
   - [[#code-formatter][Code Formatter]]
   - [[#yasnippet][Yasnippet]]
   - [[#lsp-optimization][LSP Optimization]]
+  - [[#treesitter][Treesitter]]
   - [[#python][Python]]
 
 * Basic Setup
@@ -266,8 +268,15 @@
 * Visual
 ** Themes
 #+begin_src emacs-lisp
-  (add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
-  (load-theme 'operandas t)
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (doom-themes-org-config))
+
+(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
+(load-theme 'operandas t)
 #+end_src
 
 ** Transparency
@@ -524,6 +533,12 @@
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 (add-to-list 'org-structure-template-alist '("s" . "src"))
+#+end_src
+
+* Org Roam
+#+begin_src emacs-lisp
+(use-package org-roam
+  :ensure t)
 #+end_src
 
 * Vertico & Consult
@@ -800,6 +815,7 @@
   :diminish 
   :init (global-flycheck-mode))
 #+end_src
+
 ** LSP Mode
 #+begin_src emacs-lisp
 (defun angl/lsp-mode-setup ()
@@ -847,8 +863,16 @@
 
 ** LSP Optimization
 #+begin_src emacs-lisp 
-(setq read-process-output-max (* 1024 1024)) ;; 1mb
+(setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
+#+end_src
+
+** Treesitter
+#+begin_src emacs-lisp
+(use-package treesit-auto
+  :demand t
+  :config
+  (global-treesit-auto-mode))
 #+end_src
 
 ** Python
