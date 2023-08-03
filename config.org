@@ -1,4 +1,4 @@
-#+TITLE: Angel Emacs
+: Angel Emacs
 #+AUTHOR: Nicolás Ortega
 #+DESCRIPTION: Mi configuración de Emacs
 #+STARTUP: showeverything
@@ -39,6 +39,7 @@
   - [[#orderless][Orderless]]
   - [[#vertico-stuff][Vertico stuff]]
   - [[#consult-stuff][Consult stuff]]
+  - [[#embark][Embark]]
 - [[#completion][Completion]]
   - [[#corfu][Corfu]]
 - [[#shellsterminals][Shells/Terminals]]
@@ -52,9 +53,9 @@
   - [[#neotree][NEOTREE]]
 - [[#language-support][Language Support]]
   - [[#flycheck][Flycheck]]
-  - [[#lsp-mode][LSP Mode]]
   - [[#code-formatter][Code Formatter]]
   - [[#yasnippet][Yasnippet]]
+  - [[#eglot][Eglot]]
   - [[#lsp-optimization][LSP Optimization]]
   - [[#treesitter][Treesitter]]
   - [[#python][Python]]
@@ -148,9 +149,12 @@
     "TAB TAB" '(comment-line :wk "Comment lines"))
 
   (angl/leader-keys
-    "h" '(:ignore t :wk "Help")
+    "h" '(:ignore t :wk "Help/Embark")
     "hf" '(describe-function :wk "Describe function")
-    "hv" '(describe-variable :wk "Describe variable"))
+    "hv" '(describe-variable :wk "Describe variable")
+    "ha" '(embark-act :wk "Embark act")
+    "hd" '(embark-dwim :wk "Embark current target")
+    "hb" '(embark-bindings :wk "Embark bindings"))
 
   (angl/leader-keys
     "d" '(:ignore t :wk "Dired")
@@ -168,6 +172,12 @@
     "mt" '(org-todo :wk "Org todo")
     "mB" '(org-babel-tangle :wk "Org babel tangle")
     "mT" '(org-todo-list :wk "Org todo list"))
+
+  (angl/leader-keys
+    "r" '(:ignore t :wk "Roam")
+    "rb" '(org-roam-buffer-toggle "Roam buffer toggle")
+    "rf" '(org-roam-node-file :wk "Roam find node")
+    "ri" '(org-roam-node-insert :wk "Roam insert node"))
 
   (angl/leader-keys
     "mb" '(:ignore t :wk "Tables")
@@ -258,6 +268,7 @@
 #+begin_src emacs-lisp
 (setq make-backup-files nil)
 (setq auto-save-default nil)
+(setq create-lockfiles nil)
 #+end_src
 
 ** Yes/No
@@ -319,6 +330,7 @@
 (dolist (mode '(org-mode-hook
                 term-mode-hook
                 shell-mode-hook
+                vterm-mode-hook
                 markdown-mode-hook
                 treemacs-mode-hook
                 eshell-mode-hook))
@@ -472,9 +484,10 @@
   :custom
   (highlight-indent-guides-delay 0)
   (highlight-indent-guides-responsive t)
-  (highlight-indent-guides-method 'bitmap)
+  (highlight-indent-guides-method 'character)
   ;; (highlight-indent-guides-auto-enabled t)
   ;; (highlight-indent-guides-character ?\┆)
+  (highlight-indent-guides-auto-enabled nil)
   :commands highlight-indent-guides-mode
   :hook (prog-mode  . highlight-indent-guides-mode))
 #+end_src
@@ -522,7 +535,6 @@
 
 ** Disable Electric Indent
 #+begin_src emacs-lisp
-(electric-indent-mode -1)
 (setq org-edit-src-content-indentation 0)
 #+end_src
 
@@ -538,7 +550,11 @@
 * Org Roam
 #+begin_src emacs-lisp
 (use-package org-roam
-  :ensure t)
+  :ensure t
+  :custom
+  (org-roam-directory "~/Documents/RoamNotes")
+  :config
+  (org-roam-setup))
 #+end_src
 
 * Vertico & Consult
@@ -591,61 +607,82 @@
 
 ** Consult stuff
 #+begin_src emacs-lisp
-  (use-package consult
-    :ensure t
-    :bind (("C-s" . consult-line)
-           ("C-M-l" . consult-imenu)
-           ("C-M-j" . consult-buffer)
-           ("C-c M-x" . consult-mode-command)
-           ("C-c h" . consult-history)
-           ("C-c k" . consult-kmacro)
-           ("C-c m" . consult-man)
-           ("C-c i" . consult-info)
-           ([remap Info-search] . consult-info)
-           ;; C-x bindings in `ctl-x-map'
-           ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
-           ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
-           ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
-           ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
-           ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
-           ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
-           ;; Custom M-# bindings for fast register access
-           ("M-#" . consult-register-load)
-           ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
-           ("C-M-#" . consult-register)
-           ;; Other custom bindings
-           ("M-y" . consult-yank-pop)                ;; orig. yank-pop
-           ;; M-g bindings in `goto-map'
-           ("M-g e" . consult-compile-error)
-           ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
-           ("M-g g" . consult-goto-line)             ;; orig. goto-line
-           ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
-           ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
-           ("M-g m" . consult-mark)
-           ("M-g k" . consult-global-mark)
-           ("M-g i" . consult-imenu)
-           ("M-g I" . consult-imenu-multi)
-           ;; M-s bindings in `search-map'
-           ("M-s d" . consult-find)
-           ("M-s D" . consult-locate)
-           ("M-s g" . consult-grep)
-           ("M-s G" . consult-git-grep)
-           ("M-s r" . consult-ripgrep)
-           ("M-s l" . consult-line)
-           ("M-s L" . consult-line-multi)
-           ("M-s k" . consult-keep-lines)
-           ("M-s u" . consult-focus-lines)
-           ;; Isearch integration
-           ("M-s e" . consult-isearch-history)
-           :map isearch-mode-map
-           ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
-           ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
-           ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
-           ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
-           ;; Minibuffer history
-           :map minibuffer-local-map
-           ("M-s" . consult-history)                 ;; orig. next-matching-history-element
-           ("M-r" . consult-history)))
+(use-package consult
+  :ensure t
+  :bind (("C-s" . consult-line)
+         ("C-M-l" . consult-imenu)
+         ("C-M-j" . consult-buffer)
+         ("C-c M-x" . consult-mode-command)
+         ("C-c h" . consult-history)
+         ("C-c k" . consult-kmacro)
+         ("C-c m" . consult-man)
+         ("C-c i" . consult-info)
+         ([remap Info-search] . consult-info)
+         ;; C-x bindings in `ctl-x-map'
+         ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
+         ("C-x b" . consult-buffer)                ;; orig. switch-to-buffer
+         ("C-x 4 b" . consult-buffer-other-window) ;; orig. switch-to-buffer-other-window
+         ("C-x 5 b" . consult-buffer-other-frame)  ;; orig. switch-to-buffer-other-frame
+         ("C-x r b" . consult-bookmark)            ;; orig. bookmark-jump
+         ("C-x p b" . consult-project-buffer)      ;; orig. project-switch-to-buffer
+         ;; Custom M-# bindings for fast register access
+         ("M-#" . consult-register-load)
+         ("M-'" . consult-register-store)          ;; orig. abbrev-prefix-mark (unrelated)
+         ("C-M-#" . consult-register)
+         ;; Other custom bindings
+         ("M-y" . consult-yank-pop)                ;; orig. yank-pop
+         ;; M-g bindings in `goto-map'
+         ("M-g e" . consult-compile-error)
+         ("M-g f" . consult-flymake)               ;; Alternative: consult-flycheck
+         ("M-g g" . consult-goto-line)             ;; orig. goto-line
+         ("M-g M-g" . consult-goto-line)           ;; orig. goto-line
+         ("M-g o" . consult-outline)               ;; Alternative: consult-org-heading
+         ("M-g m" . consult-mark)
+         ("M-g k" . consult-global-mark)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ;; M-s bindings in `search-map'
+         ("M-s d" . consult-find)
+         ("M-s D" . consult-locate)
+         ("M-s g" . consult-grep)
+         ("M-s G" . consult-git-grep)
+         ("M-s r" . consult-ripgrep)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s k" . consult-keep-lines)
+         ("M-s u" . consult-focus-lines)
+         ;; Isearch integration
+         ("M-s e" . consult-isearch-history)
+         :map isearch-mode-map
+         ("M-e" . consult-isearch-history)         ;; orig. isearch-edit-string
+         ("M-s e" . consult-isearch-history)       ;; orig. isearch-edit-string
+         ("M-s l" . consult-line)                  ;; needed by consult-line to detect isearch
+         ("M-s L" . consult-line-multi)            ;; needed by consult-line to detect isearch
+         ;; Minibuffer history
+         :map minibuffer-local-map
+         ("M-s" . consult-history)                 ;; orig. next-matching-history-element
+         ("M-r" . consult-history)))
+#+end_src
+
+** Embark
+#+begin_src emacs-lisp
+;; UNTIL I CAN FIX THE INCORRECT WINDOW SPLITS
+;(use-package embark
+;  :ensure t
+;  :init
+;  ;; Optionally replace the key help with a completing-read interface
+;  (setq prefix-help-command #'embark-prefix-help-command)
+;  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+;  :config
+;  (add-to-list 'display-buffer-alist
+;               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+;                 nil
+;                 (window-parameters (mode-line-format . none)))))
+;
+;(use-package embark-consult
+;  :ensure t ; only need to install it, embark loads it after consult if found
+;  :hook
+;  (embark-collect-mode . consult-preview-at-point-mode))
 #+end_src
 
 * Completion
@@ -816,32 +853,6 @@
   :init (global-flycheck-mode))
 #+end_src
 
-** LSP Mode
-#+begin_src emacs-lisp
-(defun angl/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
-(use-package lsp-mode
-   :custom
-   (lsp-completion-provider :none)
-   :commands (lsp lsp-deferred)
-   :init
-   (defun angl/lsp-mode-setup-completion ()
-     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-           '(orderless)))
-   (setq lsp-keymap-prefix "C-c l") ;; Puede ser "C-l" o "s-l"
-   :hook
-   (lsp-completion-mode . angl/lsp-mode-setup-completion)
-   :config
-   (lsp-enable-which-key-integration t))
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-doc-position 'bottom))
-#+end_src
-
 ** Code Formatter
 #+begin_src emacs-lisp
 (use-package apheleia
@@ -861,6 +872,14 @@
   (yas-global-mode 1))
 #+end_src
 
+** Eglot
+#+begin_src emacs-lisp
+(use-package eglot
+  :ensure t
+  :hook 
+  (python-ts-mode . eglot-ensure))
+#+end_src
+
 ** LSP Optimization
 #+begin_src emacs-lisp 
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
@@ -878,8 +897,5 @@
 ** Python
 #+begin_src emacs-lisp
 (use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp-deferred))))
+  :ensure t)
 #+end_src

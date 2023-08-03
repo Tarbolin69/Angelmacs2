@@ -1,0 +1,14 @@
+.cache/
+*~
+.tutor/
+auto-save-list/
+eln-cache/
+elpa/
+elpaca/
+transient/
+tree-sitter/
+.lsp-session-v1
+history
+org-roam.db
+projectile-bookmarks.eld
+recentf

@@ -45,7 +45,7 @@
       (func    "#62a0ea")
       (str     "#9AC867")
       (type    "#3fa6d4")
-      (var     "#ffffff")
+      (var     "#00D3D0")
       (selection "#283457")
       (warning   "#ff0000")
       (warning2  "#ff8800")

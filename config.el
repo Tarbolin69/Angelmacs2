@@ -78,9 +78,12 @@
     "TAB TAB" '(comment-line :wk "Comment lines"))
 
   (angl/leader-keys
-    "h" '(:ignore t :wk "Help")
+    "h" '(:ignore t :wk "Help/Embark")
     "hf" '(describe-function :wk "Describe function")
-    "hv" '(describe-variable :wk "Describe variable"))
+    "hv" '(describe-variable :wk "Describe variable")
+    "ha" '(embark-act :wk "Embark act")
+    "hd" '(embark-dwim :wk "Embark current target")
+    "hb" '(embark-bindings :wk "Embark bindings"))
 
   (angl/leader-keys
     "d" '(:ignore t :wk "Dired")
@@ -98,6 +101,12 @@
     "mt" '(org-todo :wk "Org todo")
     "mB" '(org-babel-tangle :wk "Org babel tangle")
     "mT" '(org-todo-list :wk "Org todo list"))
+
+  (angl/leader-keys
+    "r" '(:ignore t :wk "Roam")
+    "rb" '(org-roam-buffer-toggle "Roam buffer toggle")
+    "rf" '(org-roam-node-file :wk "Roam find node")
+    "ri" '(org-roam-node-insert :wk "Roam insert node"))
 
   (angl/leader-keys
     "mb" '(:ignore t :wk "Tables")
@@ -182,6 +191,13 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+(use-package doom-themes
+  :ensure t
+  :config
+  (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
+        doom-themes-enable-italic t) ; if nil, italics is universally disabled
+  (doom-themes-org-config))
+
 (add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
 (load-theme 'operandas t)
 
@@ -214,6 +230,7 @@
 (dolist (mode '(org-mode-hook
                 term-mode-hook
                 shell-mode-hook
+                vterm-mode-hook
                 markdown-mode-hook
                 treemacs-mode-hook
                 eshell-mode-hook))
@@ -346,9 +363,10 @@ one, an error is signaled."
   :custom
   (highlight-indent-guides-delay 0)
   (highlight-indent-guides-responsive t)
-  (highlight-indent-guides-method 'bitmap)
+  (highlight-indent-guides-method 'character)
   ;; (highlight-indent-guides-auto-enabled t)
   ;; (highlight-indent-guides-character ?\┆)
+  (highlight-indent-guides-auto-enabled nil)
   :commands highlight-indent-guides-mode
   :hook (prog-mode  . highlight-indent-guides-mode))
 
@@ -377,7 +395,6 @@ one, an error is signaled."
   :config
   (setq org-fancy-priorities-list '("⚠" "‼" "❗")))
 
-(electric-indent-mode -1)
 (setq org-edit-src-content-indentation 0)
 
 (require 'org-tempo)
@@ -385,6 +402,13 @@ one, an error is signaled."
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 (add-to-list 'org-structure-template-alist '("s" . "src"))
+
+(use-package org-roam
+  :ensure t
+  :custom
+  (org-roam-directory "~/Documents/RoamNotes")
+  :config
+  (org-roam-setup))
 
 (use-package orderless
   :ensure t
@@ -482,6 +506,24 @@ one, an error is signaled."
          :map minibuffer-local-map
          ("M-s" . consult-history)                 ;; orig. next-matching-history-element
          ("M-r" . consult-history)))
+
+;; UNTIL I CAN FIX THE INCORRECT WINDOW SPLITS
+;(use-package embark
+;  :ensure t
+;  :init
+;  ;; Optionally replace the key help with a completing-read interface
+;  (setq prefix-help-command #'embark-prefix-help-command)
+;  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+;  :config
+;  (add-to-list 'display-buffer-alist
+;               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+;                 nil
+;                 (window-parameters (mode-line-format . none)))))
+;
+;(use-package embark-consult
+;  :ensure t ; only need to install it, embark loads it after consult if found
+;  :hook
+;  (embark-collect-mode . consult-preview-at-point-mode))
 
 (use-package corfu
   ;; Optional customizations
@@ -618,29 +660,6 @@ one, an error is signaled."
   :diminish 
   :init (global-flycheck-mode))
 
-(defun angl/lsp-mode-setup ()
-  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
-  (lsp-headerline-breadcrumb-mode))
-
-(use-package lsp-mode
-   :custom
-   (lsp-completion-provider :none)
-   :commands (lsp lsp-deferred)
-   :init
-   (defun angl/lsp-mode-setup-completion ()
-     (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
-           '(orderless)))
-   (setq lsp-keymap-prefix "C-c l") ;; Puede ser "C-l" o "s-l"
-   :hook
-   (lsp-completion-mode . angl/lsp-mode-setup-completion)
-   :config
-   (lsp-enable-which-key-integration t))
-
-(use-package lsp-ui
-  :hook (lsp-mode . lsp-ui-mode)
-  :custom
-  (lsp-ui-doc-position 'bottom))
-
 (use-package apheleia
   :init
   (apheleia-global-mode +1))
@@ -654,11 +673,18 @@ one, an error is signaled."
   (add-to-list 'yas-snippet-dirs "~/.config/emacs/snippets")
   (yas-global-mode 1))
 
-(setq read-process-output-max (* 1024 1024)) ;; 1mb
+(use-package eglot
+  :ensure t
+  :hook 
+  (python-ts-mode . eglot-ensure))
+
+(setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
 
+(use-package treesit-auto
+  :demand t
+  :config
+  (global-treesit-auto-mode))
+
 (use-package lsp-pyright
-  :ensure t
-  :hook (python-mode . (lambda ()
-                          (require 'lsp-pyright)
-                          (lsp-deferred))))
+  :ensure t)
