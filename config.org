@@ -1,4 +1,4 @@
-: Angel Emacs
+#+TITLE: Angel Emacs
 #+AUTHOR: Nicolás Ortega
 #+DESCRIPTION: Mi configuración de Emacs
 #+STARTUP: showeverything
