@@ -176,7 +176,7 @@
   (angl/leader-keys
     "r" '(:ignore t :wk "Roam")
     "rb" '(org-roam-buffer-toggle "Roam buffer toggle")
-    "rf" '(org-roam-node-file :wk "Roam find node")
+    "rf" '(org-roam-node-find :wk "Roam find node")
     "ri" '(org-roam-node-insert :wk "Roam insert node"))
 
   (angl/leader-keys
@@ -373,74 +373,74 @@
 
 ** Buffer Move
 #+begin_src emacs-lisp
-  (require 'windmove)
+(require 'windmove)
 
-  ;;;###autoload
-  (defun buf-move-up ()
-    "Swap the current buffer and the buffer above the split.
-  If there is no split, ie now window above the current one, an
-  error is signaled."
-  ;;  "Switches between the current buffer, and the buffer above the
-  ;;  split, if possible."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'up))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (null other-win)
-          (error "No window above this one")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
+;;;###autoload
+(defun buf-move-up ()
+  "Swap the current buffer and the buffer above the split.
+If there is no split, ie now window above the current one, an
+error is signaled."
+;;  "Switches between the current buffer, and the buffer above the
+;;  split, if possible."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'up))
+         (buf-this-buf (window-buffer (selected-window))))
+    (if (null other-win)
+        (error "No window above this one")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
 
-  ;;;###autoload
-  (defun buf-move-down ()
-  "Swap the current buffer and the buffer under the split.
-  If there is no split, ie now window under the current one, an
-  error is signaled."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'down))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (or (null other-win) 
-              (string-match "^ \\*Minibuf" (buffer-name (window-buffer other-win))))
-          (error "No window under this one")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
+;;;###autoload
+(defun buf-move-down ()
+"Swap the current buffer and the buffer under the split.
+If there is no split, ie now window under the current one, an
+error is signaled."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'down))
+         (buf-this-buf (window-buffer (selected-window))))
+    (if (or (null other-win) 
+            (string-match "^ \\*Minibuf" (buffer-name (window-buffer other-win))))
+        (error "No window under this one")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
 
-  ;;;###autoload
-  (defun buf-move-left ()
-  "Swap the current buffer and the buffer on the left of the split.
-  If there is no split, ie now window on the left of the current
-  one, an error is signaled."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'left))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (null other-win)
-          (error "No left split")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
+;;;###autoload
+(defun buf-move-left ()
+"Swap the current buffer and the buffer on the left of the split.
+If there is no split, ie now window on the left of the current
+one, an error is signaled."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'left))
+         (buf-this-buf (window-buffer (selected-window))))
+    (if (null other-win)
+        (error "No left split")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
 
-  ;;;###autoload
-  (defun buf-move-right ()
-  "Swap the current buffer and the buffer on the right of the split.
-  If there is no split, ie now window on the right of the current
-  one, an error is signaled."
-    (interactive)
-    (let* ((other-win (windmove-find-other-window 'right))
-           (buf-this-buf (window-buffer (selected-window))))
-      (if (null other-win)
-          (error "No right split")
-        ;; swap top with this one
-        (set-window-buffer (selected-window) (window-buffer other-win))
-        ;; move this one to top
-        (set-window-buffer other-win buf-this-buf)
-        (select-window other-win))))
+;;;###autoload
+(defun buf-move-right ()
+"Swap the current buffer and the buffer on the right of the split.
+If there is no split, ie now window on the right of the current
+one, an error is signaled."
+  (interactive)
+  (let* ((other-win (windmove-find-other-window 'right))
+         (buf-this-buf (window-buffer (selected-window))))
+    (if (null other-win)
+        (error "No right split")
+      ;; swap top with this one
+      (set-window-buffer (selected-window) (window-buffer other-win))
+      ;; move this one to top
+      (set-window-buffer other-win buf-this-buf)
+      (select-window other-win))))
 #+end_src
 
 ** ALL THE ICONS
@@ -667,22 +667,61 @@
 ** Embark
 #+begin_src emacs-lisp
 ;; UNTIL I CAN FIX THE INCORRECT WINDOW SPLITS
-;(use-package embark
-;  :ensure t
-;  :init
-;  ;; Optionally replace the key help with a completing-read interface
-;  (setq prefix-help-command #'embark-prefix-help-command)
-;  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
-;  :config
-;  (add-to-list 'display-buffer-alist
-;               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
-;                 nil
-;                 (window-parameters (mode-line-format . none)))))
-;
-;(use-package embark-consult
-;  :ensure t ; only need to install it, embark loads it after consult if found
-;  :hook
-;  (embark-collect-mode . consult-preview-at-point-mode))
+(use-package embark
+  :ensure t
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command)
+  (add-hook 'eldoc-documentation-functions #'embark-eldoc-first-target)
+  :config
+  (add-to-list 'display-buffer-alist
+               '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
+                 nil
+                 (window-parameters (mode-line-format . none)))))
+
+
+(use-package embark-consult
+  :ensure t ; only need to install it, embark loads it after consult if found
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
+
+(defun embark-which-key-indicator ()
+  "An embark indicator that displays keymaps using which-key.
+The which-key help message will show the type and value of the
+current target followed by an ellipsis if there are further
+targets."
+  (lambda (&optional keymap targets prefix)
+    (if (null keymap)
+        (which-key--hide-popup-ignore-command)
+      (which-key--show-keymap
+       (if (eq (plist-get (car targets) :type) 'embark-become)
+           "Become"
+         (format "Act on %s '%s'%s"
+                 (plist-get (car targets) :type)
+                 (embark--truncate-target (plist-get (car targets) :target))
+                 (if (cdr targets) "…" "")))
+       (if prefix
+           (pcase (lookup-key keymap prefix 'accept-default)
+             ((and (pred keymapp) km) km)
+             (_ (key-binding prefix 'accept-default)))
+         keymap)
+       nil nil t (lambda (binding)
+                   (not (string-suffix-p "-argument" (cdr binding))))))))
+
+(setq embark-indicators
+  '(embark-which-key-indicator
+    embark-highlight-indicator
+    embark-isearch-highlight-indicator))
+
+(defun embark-hide-which-key-indicator (fn &rest args)
+  "Hide the which-key indicator immediately when using the completing-read prompter."
+  (which-key--hide-popup-ignore-command)
+  (let ((embark-indicators
+         (remq #'embark-which-key-indicator embark-indicators)))
+      (apply fn args)))
+
+(advice-add #'embark-completing-read-prompter
+            :around #'embark-hide-which-key-indicator)
 #+end_src
 
 * Completion
