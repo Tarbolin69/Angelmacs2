@@ -102,11 +102,12 @@
     "mB" '(org-babel-tangle :wk "Org babel tangle")
     "mT" '(org-todo-list :wk "Org todo list"))
 
-  (angl/leader-keys
-    "r" '(:ignore t :wk "Roam")
-    "rb" '(org-roam-buffer-toggle "Roam buffer toggle")
-    "rf" '(org-roam-node-find :wk "Roam find node")
-    "ri" '(org-roam-node-insert :wk "Roam insert node"))
+  (general-define-key ;;ROAM
+   :prefix "C-c"
+   "n" '(:ignore t :wk "Org Roam")
+   "nb" '(org-roam-buffer-toggle :wk "Roam buffer toggle")
+   "nf" '(org-roam-node-find :wk "Roam find node")
+   "ni" '(org-roam-node-insert :wk "Roam insert node"))
 
   (angl/leader-keys
     "mb" '(:ignore t :wk "Tables")
@@ -117,13 +118,13 @@
     "mdt" '(org-time-stamp :wk "Org time stamp"))
 
   (angl/leader-keys
-   "b" '(:ignore t :wk "Buffers")
-   "bb" '(switch-to-buffer :wk "Switch buffer")
-   "bi" '(ibuffer :wk "Ibuffer")
-   "bk" '(kill-this-buffer :wk "Kill this buffer")
-   "bn" '(next-buffer :wk "Next buffer")
-   "bp" '(previous-buffer :wk "Previous buffer")
-   "br" '(revert-buffer :wk "Reload buffer"))
+    "b" '(:ignore t :wk "Buffers")
+    "bb" '(switch-to-buffer :wk "Switch buffer")
+    "bi" '(ibuffer :wk "Ibuffer")
+    "bk" '(kill-this-buffer :wk "Kill this buffer")
+    "bn" '(next-buffer :wk "Next buffer")
+    "bp" '(previous-buffer :wk "Previous buffer")
+    "br" '(revert-buffer :wk "Reload buffer"))
 
   (angl/leader-keys
     "t" '(:ignore t :wk "Toggle")
@@ -211,7 +212,7 @@
   (setq initial-buffer-choice 'dashboard-open)
   (setq dashboard-set-heading-icons t)
   (setq dashboard-set-file-icons t)
-  (setq dashboard-banner-logo-title "A man's Emacs is his castle...")
+  (setq dashboard-banner-logo-title "A man's Emacs is his tempel...")
   ;(setq dashboard-startup-banner "~/.config/emacs/images/KEC_Dark_BK.png")
   (setq dashboard-startup-banner "~/.config/emacs/images/angelmacs-banner.txt")
   (setq dashboard-center-content t)
@@ -232,8 +233,9 @@
                 term-mode-hook
                 shell-mode-hook
                 vterm-mode-hook
+                pdf-view-mode-hook
                 markdown-mode-hook
-                treemacs-mode-hook
+                neotree-mode-hook
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
@@ -267,6 +269,17 @@
                                        "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
                                        ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
   (global-ligature-mode t))
+
+(use-package flyspell-correct
+  :after flyspell)
+
+(use-package flyspell-correct-ivy
+  :after flyspell-correct)
+
+(dolist (hook '(text-mode-hook))
+  (add-hook hook (lambda () (flyspell-mode 1))))
+(setq ispell-program-name "hunspell")
+(setq ispell-dictionary "es_AR")
 
 (require 'windmove)
 
@@ -373,6 +386,19 @@ one, an error is signaled."
 
 (elpaca (screenshot :host github :repo "tecosaur/screenshot"))
 
+(use-package pdf-tools
+  :ensure t
+  :config
+  (pdf-tools-install)
+  (setq-default pdf-view-display-size 'fit-page))
+
+(setq org-hide-emphasis-markers t
+      org-pretty-entities t
+      org-ellipsis "…"
+      org-auto-align-tags nil
+      org-tags-column 0
+      org-insert-heading-respect-content t)
+
 (use-package toc-org
   :commands toc-org-enable
   :init (add-hook 'org-mode-hook 'toc-org-enable))
@@ -404,6 +430,7 @@ one, an error is signaled."
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
 (add-to-list 'org-structure-template-alist '("s" . "src"))
 
+(add-to-list 'org-link-frame-setup '(file . find-file))
 (use-package org-roam
   :ensure t
   :custom
@@ -654,6 +681,7 @@ targets."
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize)
   :init (global-undo-tree-mode))
+(setq undo-tree-history-directory-alist '(("." . "~/.config/emacs/undo")))
 
 (use-package dired-open
   :config
@@ -704,6 +732,36 @@ targets."
   :init
   (apheleia-global-mode +1))
 
+;; Configure Tempel
+(use-package tempel
+  ;; Require trigger prefix before template name when completing.
+  ;; :custom
+  ;; (tempel-trigger-prefix "<")
+  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
+         ("M-*" . tempel-insert))
+  :init
+  (defun tempel-setup-capf ()
+    ;; Add the Tempel Capf to `completion-at-point-functions'.
+    ;; `tempel-expand' only triggers on exact matches. Alternatively use
+    ;; `tempel-complete' if you want to see all matches, but then you
+    ;; should also configure `tempel-trigger-prefix', such that Tempel
+    ;; does not trigger too often when you don't expect it. NOTE: We add
+    ;; `tempel-expand' *before* the main programming mode Capf, such
+    ;; that it will be tried first.
+    (setq-local completion-at-point-functions
+                (cons #'tempel-expand
+                      completion-at-point-functions)))
+  (add-hook 'conf-mode-hook 'tempel-setup-capf)
+  (add-hook 'prog-mode-hook 'tempel-setup-capf)
+  (add-hook 'text-mode-hook 'tempel-setup-capf)
+  ;; Optionally make the Tempel templates available to Abbrev,
+  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
+  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
+  ;; (global-tempel-abbrev-mode)
+)
+
+(use-package tempel-collection)
+
 (use-package yasnippet
   :ensure t
   :bind
@@ -716,7 +774,8 @@ targets."
 (use-package eglot
   :ensure t
   :hook 
-  (python-ts-mode . eglot-ensure))
+  (python-ts-mode . eglot-ensure)
+  (rust-ts-mode . eglot-ensure))
 
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
@@ -726,5 +785,5 @@ targets."
   :config
   (global-treesit-auto-mode))
 
-(use-package lsp-pyright
-  :ensure t)
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode)
+                              '("\\.py\\'" . python-ts-mode))
