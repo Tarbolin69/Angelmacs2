@@ -102,12 +102,11 @@
     "mB" '(org-babel-tangle :wk "Org babel tangle")
     "mT" '(org-todo-list :wk "Org todo list"))
 
-  (general-define-key ;;ROAM
-   :prefix "C-c"
-   "n" '(:ignore t :wk "Org Roam")
-   "nb" '(org-roam-buffer-toggle :wk "Roam buffer toggle")
-   "nf" '(org-roam-node-find :wk "Roam find node")
-   "ni" '(org-roam-node-insert :wk "Roam insert node"))
+  (angl/leader-keys
+   "r" '(:ignore t :wk "Org Roam")
+   "rb" '(org-roam-buffer-toggle :wk "Roam buffer toggle")
+   "rf" '(org-roam-node-find :wk "Roam find node")
+   "ri" '(org-roam-node-insert :wk "Roam insert node"))
 
   (angl/leader-keys
     "mb" '(:ignore t :wk "Tables")
@@ -261,15 +260,6 @@
 
 (setq-default line-spacing 0.12)
 
-(use-package ligature
-  :load-path "path-to-ligature-repo"
-  :config
-  (ligature-set-ligatures 'prog-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
-                                       "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
-                                       "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-                                       ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
-  (global-ligature-mode t))
-
 (use-package flyspell-correct
   :after flyspell)
 
@@ -386,11 +376,7 @@ one, an error is signaled."
 
 (elpaca (screenshot :host github :repo "tecosaur/screenshot"))
 
-(use-package pdf-tools
-  :ensure t
-  :config
-  (pdf-tools-install)
-  (setq-default pdf-view-display-size 'fit-page))
+(setq doc-view-ghostscript-program "zathura")
 
 (setq org-hide-emphasis-markers t
       org-pretty-entities t
@@ -732,36 +718,6 @@ targets."
   :init
   (apheleia-global-mode +1))
 
-;; Configure Tempel
-(use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
-  :init
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
-
-(use-package tempel-collection)
-
 (use-package yasnippet
   :ensure t
   :bind
@@ -771,6 +727,9 @@ targets."
   (add-to-list 'yas-snippet-dirs "~/.config/emacs/snippets")
   (yas-global-mode 1))
 
+(use-package yasnippet-snippets
+  :after yasnippet)
+
 (use-package eglot
   :ensure t
   :hook 
@@ -779,6 +738,8 @@ targets."
 
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
+
+
 
 (use-package treesit-auto
   :demand t

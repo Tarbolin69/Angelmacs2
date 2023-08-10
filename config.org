@@ -28,8 +28,7 @@
   - [[#rainbow-delimiters][Rainbow Delimiters]]
   - [[#indent-highlight][Indent Highlight]]
   - [[#screenshot][Screenshot]]
-- [[#pdf][PDF]]
-  - [[#pdf-tools][PDF Tools]]
+  - [[#pdf][PDF]]
 - [[#org-mode][ORG MODE]]
   - [[#basic-org-settings][Basic Org Settings]]
   - [[#toc][TOC]]
@@ -58,11 +57,10 @@
 - [[#language-support][Language Support]]
   - [[#flycheck][Flycheck]]
   - [[#code-formatter][Code Formatter]]
-  - [[#snippets][Snippets]]
   - [[#yasnippet][Yasnippet]]
   - [[#eglot][Eglot]]
   - [[#lsp-optimization][LSP Optimization]]
-  - [[#latex][LaTeX]]
+  - [[#latex][Latex]]
   - [[#treesitter][Treesitter]]
 
 * Basic Setup
@@ -366,15 +364,6 @@
 (add-to-list 'default-frame-alist '(font . "Iosevka 11"))
 
 (setq-default line-spacing 0.12)
-
-(use-package ligature
-  :load-path "path-to-ligature-repo"
-  :config
-  (ligature-set-ligatures 'prog-mode '("<---" "<--"  "<<-" "<-" "->" "-->" "--->" "<->" "<-->" "<--->" "<---->" "<!--"
-                                       "<==" "<===" "<=" "=>" "=>>" "==>" "===>" ">=" "<=>" "<==>" "<===>" "<====>" "<!---"
-                                       "<~~" "<~" "~>" "~~>" "::" ":::" "==" "!=" "===" "!=="
-                                       ":=" ":-" ":+" "<*" "<*>" "*>" "<|" "<|>" "|>" "+:" "-:" "=:" "<******>" "++" "+++"))
-  (global-ligature-mode t))
 #+end_src
 
 ** Correccion Gramatica
@@ -517,14 +506,9 @@ one, an error is signaled."
 (elpaca (screenshot :host github :repo "tecosaur/screenshot"))
 #+end_src
 
-* PDF
-** PDF Tools
+** PDF
 #+begin_src emacs-lisp
-(use-package pdf-tools
-  :ensure t
-  :config
-  (pdf-tools-install)
-  (setq-default pdf-view-display-size 'fit-page))
+(setq doc-view-ghostscript-program "zathura")
 #+end_src
 
 * ORG MODE
@@ -610,39 +594,39 @@ one, an error is signaled."
 
 ** Vertico stuff
 #+begin_src emacs-lisp
-  (use-package vertico
-    :ensure t
-    :bind (:map vertico-map
-           ("C-j" . vertico-next)
-           ("C-k" . vertico-previous)
-           ("C-f" . vertico-exit)
-           :map minibuffer-local-map
-           ("M-h" . backward-kill-word))
-    :custom
-    (vertico-cycle t)
-    :init
-    (vertico-mode))
+(use-package vertico
+  :ensure t
+  :bind (:map vertico-map
+         ("C-j" . vertico-next)
+         ("C-k" . vertico-previous)
+         ("C-f" . vertico-exit)
+         :map minibuffer-local-map
+         ("M-h" . backward-kill-word))
+  :custom
+  (vertico-cycle t)
+  :init
+  (vertico-mode))
 
-  (use-package savehist
-    :elpaca nil
-    :config
-    (setq history-lenght 25)
-    :init
-    (savehist-mode))
+(use-package savehist
+  :elpaca nil
+  :config
+  (setq history-lenght 25)
+  :init
+  (savehist-mode))
 
-  (recentf-mode 1)
-  (setq recentf-max-menu-items 25)
-  (setq recentf-max-saved-items 25) 
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(setq recentf-max-saved-items 25) 
 
-  (use-package marginalia
-    :after vertico
-    :ensure t
-    :custom
-    (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
-    (marginalia-max-relative-age 0)
-    (marginalia-align 'right)
-    :init
-    (marginalia-mode))
+(use-package marginalia
+  :after vertico
+  :ensure t
+  :custom
+  (marginalia-annotators '(marginalia-annotators-heavy marginalia-annotators-light nil))
+  (marginalia-max-relative-age 0)
+  (marginalia-align 'right)
+  :init
+  (marginalia-mode))
 #+end_src
 
 ** Consult stuff
@@ -940,39 +924,6 @@ targets."
   (apheleia-global-mode +1))
 #+end_src
 
-** Snippets
-#+begin_src emacs-lisp
-;; Configure Tempel
-(use-package tempel
-  ;; Require trigger prefix before template name when completing.
-  ;; :custom
-  ;; (tempel-trigger-prefix "<")
-  :bind (("M-+" . tempel-complete) ;; Alternative tempel-expand
-         ("M-*" . tempel-insert))
-  :init
-  (defun tempel-setup-capf ()
-    ;; Add the Tempel Capf to `completion-at-point-functions'.
-    ;; `tempel-expand' only triggers on exact matches. Alternatively use
-    ;; `tempel-complete' if you want to see all matches, but then you
-    ;; should also configure `tempel-trigger-prefix', such that Tempel
-    ;; does not trigger too often when you don't expect it. NOTE: We add
-    ;; `tempel-expand' *before* the main programming mode Capf, such
-    ;; that it will be tried first.
-    (setq-local completion-at-point-functions
-                (cons #'tempel-expand
-                      completion-at-point-functions)))
-  (add-hook 'conf-mode-hook 'tempel-setup-capf)
-  (add-hook 'prog-mode-hook 'tempel-setup-capf)
-  (add-hook 'text-mode-hook 'tempel-setup-capf)
-  ;; Optionally make the Tempel templates available to Abbrev,
-  ;; either locally or globally. `expand-abbrev' is bound to C-x '.
-  ;; (add-hook 'prog-mode-hook #'tempel-abbrev-mode)
-  ;; (global-tempel-abbrev-mode)
-)
-
-(use-package tempel-collection)
-#+end_src
-
 ** Yasnippet
 #+begin_src emacs-lisp
 (use-package yasnippet
@@ -983,6 +934,9 @@ targets."
   :config
   (add-to-list 'yas-snippet-dirs "~/.config/emacs/snippets")
   (yas-global-mode 1))
+
+(use-package yasnippet-snippets
+  :after yasnippet)
 #+end_src
 
 ** Eglot
@@ -1000,7 +954,9 @@ targets."
 (setq gc-cons-threshold 100000000)
 #+end_src
 
-** LaTeX
+** Latex
+#+begin_src emacs-lisp
+#+end_src
 
 ** Treesitter
 #+begin_src emacs-lisp
