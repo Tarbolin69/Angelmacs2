@@ -10,5 +10,7 @@ tree-sitter/
 .lsp-session-v1
 history
 org-roam.db
+bookmarks
+.org-id-locations
 projectile-bookmarks.eld
 recentf
