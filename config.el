@@ -203,7 +203,6 @@
 (load-theme 'operandas t)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90))
-;; ADD THIS WHEN YOU UPDATE TO EMACS 29
 
 (use-package dashboard
   :ensure t
@@ -340,6 +339,21 @@ one, an error is signaled."
       (set-window-buffer other-win buf-this-buf)
       (select-window other-win))))
 
+(use-package popper
+  :ensure t ; or :straight t
+  :bind (("C-¿"   . popper-toggle-latest)
+         ("M-¿"   . popper-cycle)
+         ("C-M-¿" . popper-toggle-type))
+  :init
+  (setq popper-reference-buffers
+        '("\\*Messages\\*"
+          "Output\\*$"
+          "\\*Async Shell Command\\*"
+          help-mode
+          compilation-mode))
+  (popper-mode +1)
+  (popper-echo-mode +1))                ; For echo area hints
+
 (use-package all-the-icons
   :ensure t
   :if (display-graphic-p))
@@ -376,8 +390,6 @@ one, an error is signaled."
 
 (elpaca (screenshot :host github :repo "tecosaur/screenshot"))
 
-(setq doc-view-ghostscript-program "zathura")
-
 (setq org-hide-emphasis-markers t
       org-pretty-entities t
       org-ellipsis "…"
@@ -409,11 +421,13 @@ one, an error is signaled."
   (setq org-fancy-priorities-list '("⚠" "‼" "❗")))
 
 (setq org-edit-src-content-indentation 0)
+(electric-pair-mode 1)
 
 (require 'org-tempo)
 (add-to-list 'org-structure-template-alist '("sh" . "src shell"))
 (add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
 (add-to-list 'org-structure-template-alist '("py" . "src python"))
+(add-to-list 'org-structure-template-alist '("rs" . "src rust"))
 (add-to-list 'org-structure-template-alist '("s" . "src"))
 
 (add-to-list 'org-link-frame-setup '(file . find-file))
@@ -533,7 +547,6 @@ one, an error is signaled."
                '("\\`\\*Embark Collect \\(Live\\|Completions\\)\\*"
                  nil
                  (window-parameters (mode-line-format . none)))))
-
 
 (use-package embark-consult
   :ensure t ; only need to install it, embark loads it after consult if found
@@ -738,8 +751,6 @@ targets."
 
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
-
-
 
 (use-package treesit-auto
   :demand t
