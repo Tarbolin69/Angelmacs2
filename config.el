@@ -42,125 +42,84 @@
 
 (elpaca-wait)
 
-(use-package evil
-  :init
-  (setq evil-want-integration t)
-  (setq evil-want-keybinding nil)
-  (setq evil-vsplit-window-right t)
-  (setq evil-split-window-below t)
-  (setq evil-undo-system 'undo-tree)
-  (evil-mode))
-(use-package evil-collection
-  :after evil
-  :config
-  (setq evil-collection-mode-list '(dashboard dired ibuffer))
-  (evil-collection-init))
-(use-package evil-tutor)
+;(use-package evil
+;  :init
+;  (setq evil-want-integration t)
+;  (setq evil-want-keybinding nil)
+;  (setq evil-vsplit-window-right t)
+;  (setq evil-split-window-below t)
+;  (setq evil-undo-system 'undo-tree)
+;  (evil-mode))
+;(use-package evil-collection
+;  :after evil
+;  :config
+;  (setq evil-collection-mode-list '(dashboard dired ibuffer))
+;  (evil-collection-init))
+;(use-package evil-tutor)
 
 (use-package general
   :config
-  (general-evil-setup)
+  ;(general-evil-setup)
 
   (general-define-key ;; Just a better way to escape stuff
     "<escape>" 'keyboard-escape-quit)  
 
-  (general-create-definer angl/leader-keys
-     :states '(normal insert visual emacs)
-     :keymaps 'override
-     :prefix "SPC"
-     :global-prefix "M-SPC")
+ ; (general-create-definer angl/leader-keys
+ ;    :keymaps 'override
+ ;    :prefix "C-c"
+ ;    :global-prefix "C-c")
 
-  (angl/leader-keys
-    "f" '(:ignore t :wk "Files")
-    "ff" '(find-file :wk "Find files")
-    "fr" '(consult-recent-file :wk "Find recent files")
-    "fc" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Emacs config file")
-    "TAB TAB" '(comment-line :wk "Comment lines"))
+  (general-define-key
+   :prefix "C-x"
+    "C-r" '(consult-recent-file :wk "Find recent files"))
 
-  (angl/leader-keys
-    "h" '(:ignore t :wk "Help/Embark")
-    "hf" '(describe-function :wk "Describe function")
-    "hv" '(describe-variable :wk "Describe variable")
-    "ha" '(embark-act :wk "Embark act")
-    "hd" '(embark-dwim :wk "Embark current target")
-    "hb" '(embark-bindings :wk "Embark bindings"))
+  (general-define-key
+   :prefix "C-c"
+    "e" '(:ignore t :wk "Help/Embark")
+    "ef" '(describe-function :wk "Describe function")
+    "ev" '(describe-variable :wk "Describe variable")
+    "ea" '(embark-act :wk "Embark act")
+    "ed" '(embark-dwim :wk "Embark current target")
+    "eb" '(embark-bindings :wk "Embark bindings"))
 
-  (angl/leader-keys
-    "d" '(:ignore t :wk "Dired")
-    "dd" '(dired :wk "Open dired")
-    "dj" '(dired-jump :wk "Dired jump to current")
-    "dn" '(neotree-dir :wk "Open directory in neotree")
-    "dp" '(peep-dired :wk "Peep-dired"))
+  (general-define-key
+   :prefix "C-c"
+    "C-l" '(org-cliplink :wk "Org cliplink")
+   ; "oa" '(org-agenda :wk "Org agenda")
+   ; "oe" '(org-export-dispatch :wk "Org export dispatch")
+)
 
-  (angl/leader-keys
-    "m" '(:ignore t :wk "Org")
-    "mc" '(org-cliplink :wk "Org cliplink")
-    "ma" '(org-agenda :wk "Org agenda")
-    "me" '(org-export-dispatch :wk "Org export dispatch")
-    "mi" '(org-toggle-item :wk "Org toggle item")
-    "mt" '(org-todo :wk "Org todo")
-    "mB" '(org-babel-tangle :wk "Org babel tangle")
-    "mT" '(org-todo-list :wk "Org todo list"))
-
-  (angl/leader-keys
+  (general-define-key
+   :prefix "C-c"
    "r" '(:ignore t :wk "Org Roam")
    "rb" '(org-roam-buffer-toggle :wk "Roam buffer toggle")
    "rf" '(org-roam-node-find :wk "Roam find node")
    "ri" '(org-roam-node-insert :wk "Roam insert node"))
 
-  (angl/leader-keys
-    "mb" '(:ignore t :wk "Tables")
-    "mb-" '(org-table-insert-hline :wk "Insert hline in table"))
+  (general-define-key
+   :prefix "C-x"
+    "K" '(kill-this-buffer :wk "Kill this buffer"))
 
-  (angl/leader-keys
-    "md" '(:ignore t :wk "Date/Deadline")
-    "mdt" '(org-time-stamp :wk "Org time stamp"))
-
-  (angl/leader-keys
-    "b" '(:ignore t :wk "Buffers")
-    "bb" '(switch-to-buffer :wk "Switch buffer")
-    "bi" '(ibuffer :wk "Ibuffer")
-    "bk" '(kill-this-buffer :wk "Kill this buffer")
-    "bn" '(next-buffer :wk "Next buffer")
-    "bp" '(previous-buffer :wk "Previous buffer")
-    "br" '(revert-buffer :wk "Reload buffer"))
-
-  (angl/leader-keys
+  (general-define-key
+   :prefix "C-c"
     "t" '(:ignore t :wk "Toggle")
     "tt" '(visual-line-mode :wk "Toggle truncated lines")
     "tn" '(neotree-toggle :wk "Toggle neotree")
     "tv" '(vterm-toggle :wk "Toggle vterm"))
 
-  (angl/leader-keys
+  (general-define-key
+   :prefix "C-x"
     "w" '(:ignore t :wk "Windows")
-    ;; Window splits
-    "wc" '(evil-window-delete :wk "Close window")
-    "wn" '(evil-window-new :wk "New window")
-    "ws" '(evil-window-split :wk "Horizontal split window")
-    "wv" '(evil-window-vsplit :wk "Vertical split window")
-    ;; Window motions
-    "wh" '(evil-window-left :wk "Window left")
-    "wj" '(evil-window-down :wk "Window down")
-    "wk" '(evil-window-up :wk "Window up")
-    "wl" '(evil-window-right :wk "Window right")
-    "ww" '(evil-window-next :wk "Goto next window")
     ;;Move windows
     "wH" '(buf-move-left :wk "Buffer move left")
     "wJ" '(buf-move-left :wk "Buffer move down")
     "wK" '(buf-move-left :wk "Buffer move up")
     "wL" '(buf-move-left :wk "Buffer move right"))
 
-  (angl/leader-keys
+  (general-define-key
+   :prefix "C-c"
     "p" '(:ignore t :wk "Projects")
-    "pm" '(magit :wk "Open Magit"))
-
-  (angl/leader-keys
-    "e" '(:ignore t :wk "Evaluate")
-    "eb" '(eval-buffer :wk "Evaluate elips in buffer")
-    "ed" '(eval-defun :wk "Evaluate defun in or after point")
-    "ee" '(eval-expression :wk "Evaluate elisp expression")
-    "el" '(eval-lasp-sexp :wk "Evaluate elips before point")
-    "er" '(eval-region :wk "Evaluate elisp in region"))
+    "p SPC" '(magit-status :wk "Magit Board"))
 )
 
 (use-package which-key
@@ -176,13 +135,14 @@
         which-key-side-window-slot -10
         which-key-side-window-max-height 0.25
         which-key-idle-delay 0.8
-        which-key-max-description-lenght 25
+        which-key-max-description-lenght 20
         which-key-allow-imprecise-window-fit nil
         which-key-separator " → " ))
 
 (use-package sudo-edit
   :config
-    (angl/leader-keys
+    (general-define-key
+     :prefix "C-c"
       "fu" '(sudo-edit-find-file :wk "Sudo find file")
       "fU" '(sudo-edit :wk "Sudo edit file")))
 
@@ -192,14 +152,18 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
+(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
+
 (use-package doom-themes
   :ensure t
   :config
   (setq doom-themes-enable-bold t    ; if nil, bold is universally disabled
         doom-themes-enable-italic t) ; if nil, italics is universally disabled
-  (doom-themes-org-config))
 
-(add-to-list 'custom-theme-load-path "~/.config/emacs/themes/")
+(doom-themes-neotree-config)
+(doom-themes-org-config)
+(doom-themes-org-config))
+
 (load-theme 'operandas t)
 
 (add-to-list 'default-frame-alist '(alpha-background . 90))
@@ -348,6 +312,7 @@ one, an error is signaled."
   (setq popper-reference-buffers
         '("\\*Messages\\*"
           "Output\\*$"
+	      "\\*Python\\*"
           "\\*Async Shell Command\\*"
           help-mode
           compilation-mode))
@@ -367,6 +332,9 @@ one, an error is signaled."
   :init
   (all-the-icons-completion-mode))
 
+;(use-package doom-modeline
+;  :ensure t
+;  :init (doom-modeline-mode 1))
 (use-package mood-line
   :init
   (mood-line-mode))
@@ -535,7 +503,6 @@ one, an error is signaled."
          ("M-s" . consult-history)                 ;; orig. next-matching-history-element
          ("M-r" . consult-history)))
 
-;; UNTIL I CAN FIX THE INCORRECT WINDOW SPLITS
 (use-package embark
   :ensure t
   :init
