@@ -42,84 +42,125 @@
 
 (elpaca-wait)
 
-;(use-package evil
-;  :init
-;  (setq evil-want-integration t)
-;  (setq evil-want-keybinding nil)
-;  (setq evil-vsplit-window-right t)
-;  (setq evil-split-window-below t)
-;  (setq evil-undo-system 'undo-tree)
-;  (evil-mode))
-;(use-package evil-collection
-;  :after evil
-;  :config
-;  (setq evil-collection-mode-list '(dashboard dired ibuffer))
-;  (evil-collection-init))
-;(use-package evil-tutor)
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-vsplit-window-right t)
+  (setq evil-split-window-below t)
+  (setq evil-undo-system 'undo-tree)
+  (evil-mode))
+(use-package evil-collection
+  :after evil
+  :config
+  (setq evil-collection-mode-list '(dashboard dired ibuffer))
+  (evil-collection-init))
+(use-package evil-tutor)
 
 (use-package general
   :config
-  ;(general-evil-setup)
+  (general-evil-setup)
 
   (general-define-key ;; Just a better way to escape stuff
     "<escape>" 'keyboard-escape-quit)  
 
- ; (general-create-definer angl/leader-keys
- ;    :keymaps 'override
- ;    :prefix "C-c"
- ;    :global-prefix "C-c")
+  (general-create-definer angl/leader-keys
+     :states '(normal insert visual emacs)
+     :keymaps 'override
+     :prefix "SPC"
+     :global-prefix "M-SPC")
 
-  (general-define-key
-   :prefix "C-x"
-    "C-r" '(consult-recent-file :wk "Find recent files"))
+  (angl/leader-keys
+    "f" '(:ignore t :wk "Files")
+    "ff" '(find-file :wk "Find files")
+    "fr" '(consult-recent-file :wk "Find recent files")
+    "fc" '((lambda () (interactive) (find-file "~/.config/emacs/config.org")) :wk "Emacs config file")
+    "TAB TAB" '(comment-line :wk "Comment lines"))
 
-  (general-define-key
-   :prefix "C-c"
-    "e" '(:ignore t :wk "Help/Embark")
-    "ef" '(describe-function :wk "Describe function")
-    "ev" '(describe-variable :wk "Describe variable")
-    "ea" '(embark-act :wk "Embark act")
-    "ed" '(embark-dwim :wk "Embark current target")
-    "eb" '(embark-bindings :wk "Embark bindings"))
+  (angl/leader-keys
+    "h" '(:ignore t :wk "Help/Embark")
+    "hf" '(describe-function :wk "Describe function")
+    "hv" '(describe-variable :wk "Describe variable")
+    "ha" '(embark-act :wk "Embark act")
+    "hd" '(embark-dwim :wk "Embark current target")
+    "hb" '(embark-bindings :wk "Embark bindings"))
 
-  (general-define-key
-   :prefix "C-c"
-    "C-l" '(org-cliplink :wk "Org cliplink")
-   ; "oa" '(org-agenda :wk "Org agenda")
-   ; "oe" '(org-export-dispatch :wk "Org export dispatch")
-)
+  (angl/leader-keys
+    "d" '(:ignore t :wk "Dired")
+    "dd" '(dired :wk "Open dired")
+    "dj" '(dired-jump :wk "Dired jump to current")
+    "dn" '(neotree-dir :wk "Open directory in neotree")
+    "dp" '(peep-dired :wk "Peep-dired"))
 
-  (general-define-key
-   :prefix "C-c"
+  (angl/leader-keys
+    "m" '(:ignore t :wk "Org")
+    "mc" '(org-cliplink :wk "Org cliplink")
+    "ma" '(org-agenda :wk "Org agenda")
+    "me" '(org-export-dispatch :wk "Org export dispatch")
+    "mi" '(org-toggle-item :wk "Org toggle item")
+    "mt" '(org-todo :wk "Org todo")
+    "mB" '(org-babel-tangle :wk "Org babel tangle")
+    "mT" '(org-todo-list :wk "Org todo list"))
+
+  (angl/leader-keys
    "r" '(:ignore t :wk "Org Roam")
    "rb" '(org-roam-buffer-toggle :wk "Roam buffer toggle")
    "rf" '(org-roam-node-find :wk "Roam find node")
    "ri" '(org-roam-node-insert :wk "Roam insert node"))
 
-  (general-define-key
-   :prefix "C-x"
-    "K" '(kill-this-buffer :wk "Kill this buffer"))
+  (angl/leader-keys
+    "mb" '(:ignore t :wk "Tables")
+    "mb-" '(org-table-insert-hline :wk "Insert hline in table"))
 
-  (general-define-key
-   :prefix "C-c"
+  (angl/leader-keys
+    "md" '(:ignore t :wk "Date/Deadline")
+    "mdt" '(org-time-stamp :wk "Org time stamp"))
+
+  (angl/leader-keys
+    "b" '(:ignore t :wk "Buffers")
+    "bb" '(switch-to-buffer :wk "Switch buffer")
+    "bi" '(ibuffer :wk "Ibuffer")
+    "bk" '(kill-this-buffer :wk "Kill this buffer")
+    "bn" '(next-buffer :wk "Next buffer")
+    "bp" '(previous-buffer :wk "Previous buffer")
+    "br" '(revert-buffer :wk "Reload buffer"))
+
+  (angl/leader-keys
     "t" '(:ignore t :wk "Toggle")
     "tt" '(visual-line-mode :wk "Toggle truncated lines")
     "tn" '(neotree-toggle :wk "Toggle neotree")
     "tv" '(vterm-toggle :wk "Toggle vterm"))
 
-  (general-define-key
-   :prefix "C-x"
+  (angl/leader-keys
     "w" '(:ignore t :wk "Windows")
+    ;; Window splits
+    "wc" '(evil-window-delete :wk "Close window")
+    "wn" '(evil-window-new :wk "New window")
+    "ws" '(evil-window-split :wk "Horizontal split window")
+    "wv" '(evil-window-vsplit :wk "Vertical split window")
+    ;; Window motions
+    "wh" '(evil-window-left :wk "Window left")
+    "wj" '(evil-window-down :wk "Window down")
+    "wk" '(evil-window-up :wk "Window up")
+    "wl" '(evil-window-right :wk "Window right")
+    "ww" '(evil-window-next :wk "Goto next window")
     ;;Move windows
     "wH" '(buf-move-left :wk "Buffer move left")
     "wJ" '(buf-move-left :wk "Buffer move down")
     "wK" '(buf-move-left :wk "Buffer move up")
     "wL" '(buf-move-left :wk "Buffer move right"))
 
-  (general-define-key
-   :prefix "C-c"
+  (angl/leader-keys
     "p" '(:ignore t :wk "Projects")
-    "p SPC" '(magit-status :wk "Magit Board"))
+    "pm" '(magit :wk "Open Magit"))
+
+  (angl/leader-keys
+    "e" '(:ignore t :wk "Evaluate")
+    "eb" '(eval-buffer :wk "Evaluate elips in buffer")
+    "ed" '(eval-defun :wk "Evaluate defun in or after point")
+    "ee" '(eval-expression :wk "Evaluate elisp expression")
+    "el" '(eval-lasp-sexp :wk "Evaluate elips before point")
+    "er" '(eval-region :wk "Evaluate elisp in region"))
 )
 
 (use-package which-key
@@ -141,8 +182,7 @@
 
 (use-package sudo-edit
   :config
-    (general-define-key
-     :prefix "C-c"
+(angl/leader-keys
       "fu" '(sudo-edit-find-file :wk "Sudo find file")
       "fU" '(sudo-edit :wk "Sudo edit file")))
 
@@ -416,9 +456,6 @@ one, an error is signaled."
 (use-package vertico
   :ensure t
   :bind (:map vertico-map
-         ("C-j" . vertico-next)
-         ("C-k" . vertico-previous)
-         ("C-f" . vertico-exit)
          :map minibuffer-local-map
          ("M-h" . backward-kill-word))
   :custom
