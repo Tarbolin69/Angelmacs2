@@ -56,6 +56,11 @@
   (setq evil-collection-mode-list '(dashboard dired ibuffer))
   (evil-collection-init))
 (use-package evil-tutor)
+(with-eval-after-load 'evil-maps
+  (define-key evil-motion-state-map (kbd "SPC") nil)
+  (define-key evil-motion-state-map (kbd "RET") nil)
+  (define-key evil-motion-state-map (kbd "TAB") nil))
+(setq org-return-follows-link t)
 
 (use-package general
   :config
@@ -152,7 +157,12 @@
 
   (angl/leader-keys
     "p" '(:ignore t :wk "Projects")
-    "pm" '(magit :wk "Open Magit"))
+    "pm" '(magit :wk "Open Magit")
+    "pc" '(compile :wk "Compile")
+    "pa" '(:ignore t :wk "Code actions")
+    "paa" '(eglot-code-actions :wk "Eglot actions")
+    "par" '(eglot-rename :wk "Eglot rename")
+    "pah" '(eldoc-box-help-at-point :wk "Eldoc box"))
 
   (angl/leader-keys
     "e" '(:ignore t :wk "Evaluate")
@@ -226,6 +236,10 @@
 (menu-bar-mode -1)
 (tool-bar-mode -1)
 (scroll-bar-mode -1)
+(add-hook 'org-mode-hook (lambda ()
+           (setq-local electric-pair-inhibit-predicate
+                   `(lambda (c)
+                  (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c))))))
 
 (global-display-line-numbers-mode 1)
 (global-visual-line-mode 1)
@@ -242,7 +256,7 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 (set-face-attribute 'default nil
-  :font "Iosevka"
+  :font "Iosevka Comfy"
   :height 110
   :weight 'medium)
 (set-face-attribute 'variable-pitch nil
@@ -250,7 +264,7 @@
   :height 120
   :weight 'medium)
 (set-face-attribute 'fixed-pitch nil
-  :font "Iosevka"
+  :font "Iosevka Comfy"
   :height 110
   :weight 'medium)
 
@@ -381,6 +395,19 @@ one, an error is signaled."
 
 (use-package rainbow-mode
   :hook org-mode prog-mode)
+
+(use-package hl-todo
+  :hook ((org-mode . hl-todo-mode)
+	     (prog-mode . hl-todo-mode))
+  :config
+  (setq hl-todo-higlight-punctuation ":"
+	    hl-todo-keyword-faces
+	    '(("TODO"       warning bold)
+	      ("FIXME"      error bold)
+	      ("HACK"       font-lock-constant-face bold)
+	      ("REVIEW"     font-lock-keyword-face bold)
+	      ("NOTE"       success bold)
+	      ("DEPRECATED" font-lock-doc-face bold))))
 
 (use-package rainbow-delimiters
   :hook (prog-mode . rainbow-delimiters-mode))
@@ -681,6 +708,13 @@ targets."
 
 (use-package magit)
 
+(use-package git-timemachine
+  :after git-timemachine
+  :hook (evil-normalize-keymaps . git-timemachine-hook)
+  :config
+    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-j") 'git-timemachine-show-previous-revision)
+    (evil-define-key 'normal git-timemachine-mode-map (kbd "C-k") 'git-timemachine-show-next-revision))
+
 (use-package undo-tree
   :bind ("C-x u" . undo-tree-visualize)
   :init (global-undo-tree-mode))
@@ -755,6 +789,17 @@ targets."
 
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
+
+(elpaca (breadcrumb :host github :repo "joaotavora/breadcrumb"))
+(add-hook 'eglot-managed-mode-hook #'breadcrumb-mode)
+
+(use-package eldoc-box)
+(setq eldoc-box-max-pixel-height 300)
+(setq eldoc-box-max-pixel-width 500)
+
+(use-package haskell-mode)
+
+(use-package typst-mode)
 
 (use-package treesit-auto
   :demand t
