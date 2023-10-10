@@ -7,6 +7,7 @@
 * TABLE OF CONTENTS :toc:
 - [[#basic-setup][Basic Setup]]
   - [[#elpaca--use-package][Elpaca & use-package]]
+  - [[#faster-search][Faster Search]]
   - [[#evil-mode][EVIL-MODE]]
   - [[#basic-keybindings][Basic Keybindings]]
   - [[#which-key][Which Key]]
@@ -19,9 +20,11 @@
   - [[#dashboard][Dashboard]]
   - [[#disable-visual-clutter][Disable Visual Clutter]]
   - [[#line-numbering][Line Numbering]]
+  - [[#utf-8][UTF-8]]
   - [[#fuentes-tipograficas][Fuentes Tipograficas]]
   - [[#corrección-gramática][Corrección Gramática]]
   - [[#buffer-move][Buffer Move]]
+  - [[#window-navigation][Window Navigation]]
   - [[#window-popper-management][Window POPPER Management]]
   - [[#all-the-icons][ALL THE ICONS]]
   - [[#moodline][Moodline]]
@@ -30,8 +33,10 @@
   - [[#rainbow-delimiters][Rainbow Delimiters]]
   - [[#indent-highlight][Indent Highlight]]
   - [[#screenshot][Screenshot]]
+- [[#denote][Denote]]
 - [[#org-mode][ORG MODE]]
   - [[#basic-org-settings][Basic Org Settings]]
+  - [[#org-babel-execute][Org Babel Execute]]
   - [[#toc][TOC]]
   - [[#org-cliplink][Org Cliplink]]
   - [[#org-superstar][Org Superstar]]
@@ -63,8 +68,11 @@
   - [[#code-formatter][Code Formatter]]
   - [[#yasnippet][Yasnippet]]
   - [[#eglot][Eglot]]
+  - [[#rust][Rust]]
+  - [[#chatgpt-maybe][ChatGPT (maybe)]]
+  - [[#general-web][General Web]]
+  - [[#markdown][Markdown]]
   - [[#lsp-optimization][LSP Optimization]]
-  - [[#breadcrumbs][Breadcrumbs]]
   - [[#hover-documentation][Hover Documentation]]
   - [[#haskell][Haskell]]
   - [[#typst][Typst]]
@@ -116,6 +124,11 @@
     (setq elpaca-use-package-by-default t))
 
   (elpaca-wait)
+#+end_src
+
+** Faster Search
+#+begin_src emacs-lisp
+(setq xref-search-program 'ripgrep)
 #+end_src
 
 ** EVIL-MODE
@@ -365,6 +378,14 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 #+end_src
 
+** UTF-8
+#+begin_src emacs-lisp
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+#+end_src
+
 ** Fuentes Tipograficas
 #+begin_src emacs-lisp
 (set-face-attribute 'default nil
@@ -401,7 +422,7 @@
 (dolist (hook '(text-mode-hook))
   (add-hook hook (lambda () (flyspell-mode 1))))
 (setq ispell-program-name "hunspell")
-(setq ispell-dictionary "es_AR")
+(setq ispell-dictionary "en_US")
 #+end_src
 
 ** Buffer Move
@@ -474,6 +495,21 @@ one, an error is signaled."
       ;; move this one to top
       (set-window-buffer other-win buf-this-buf)
       (select-window other-win))))
+#+end_src
+
+** Window Navigation
+#+begin_src emacs-lisp
+(use-package switch-window
+   :config
+   (setq switch-window-input-style 'minibuffer)
+   (setq switch-window-increase 4)
+   (setq switch-window-threshold 2)
+   (setq switch-window-shortcut-style 'qwerty)
+   (setq switch-window-qwerty-shortcuts
+         '("a" "s" "d" "f" "j" "k" "l"))
+   (setq switch-window-minibuffer-shortcut ?z)
+   :bind
+   ([remap other-window] . switch-window))
 #+end_src
 
 ** Window POPPER Management
@@ -568,6 +604,11 @@ one, an error is signaled."
 (elpaca (screenshot :host github :repo "tecosaur/screenshot"))
 #+end_src
 
+* Denote
+#+begin_src emacs-lisp
+(use-package denote)
+#+end_src
+
 * ORG MODE
 ** Basic Org Settings
 #+begin_src emacs-lisp
@@ -577,6 +618,14 @@ one, an error is signaled."
       org-auto-align-tags nil
       org-tags-column 0
       org-insert-heading-respect-content t)
+#+end_src
+
+** Org Babel Execute
+#+begin_src emacs-lisp
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (C      . t)))
 #+end_src
 
 ** TOC
@@ -1020,16 +1069,34 @@ TODO: Add Perspective, maybe
   (rust-ts-mode . eglot-ensure))
 #+end_src
 
+** Rust
+#+begin_src emacs-lisp
+(use-package rustic)
+(setq rustic-lsp-client 'eglot)
+#+end_src
+
+** ChatGPT (maybe)
+#+begin_src emacs-lisp
+;(use-package gptel
+;  :config
+;  (let* ((open-ai-auth (car (auth-source-search :host "OpenAI"))))
+;    (setq gptel-api-key (plist-get open-ai-auth :api_key))))
+#+end_src
+
+** General Web
+#+begin_src emacs-lisp
+(add-hook 'prog-mode-hook 'toggle-truncate-lines)
+#+end_src
+
+** Markdown
+#+begin_src emacs-lisp
+(use-package markdown-mode)
+#+end_src
+
 ** LSP Optimization
 #+begin_src emacs-lisp 
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
-#+end_src
-
-** Breadcrumbs
-#+begin_src emacs-lisp
-(elpaca (breadcrumb :host github :repo "joaotavora/breadcrumb"))
-(add-hook 'eglot-managed-mode-hook #'breadcrumb-mode)
 #+end_src
 
 ** Hover Documentation
@@ -1037,6 +1104,7 @@ TODO: Add Perspective, maybe
 (use-package eldoc-box)
 (setq eldoc-box-max-pixel-height 300)
 (setq eldoc-box-max-pixel-width 500)
+(setq eldoc-echo-area-use-multiline-p nil)
 #+end_src
 
 ** Haskell

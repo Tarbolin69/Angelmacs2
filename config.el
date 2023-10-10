@@ -42,6 +42,8 @@
 
 (elpaca-wait)
 
+(setq xref-search-program 'ripgrep)
+
 (use-package evil
   :init
   (setq evil-want-integration t)
@@ -255,6 +257,11 @@
                 eshell-mode-hook))
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
 (set-face-attribute 'default nil
   :font "Iosevka Comfy"
   :height 110
@@ -286,7 +293,7 @@
 (dolist (hook '(text-mode-hook))
   (add-hook hook (lambda () (flyspell-mode 1))))
 (setq ispell-program-name "hunspell")
-(setq ispell-dictionary "es_AR")
+(setq ispell-dictionary "en_US")
 
 (require 'windmove)
 
@@ -357,6 +364,18 @@ one, an error is signaled."
       (set-window-buffer other-win buf-this-buf)
       (select-window other-win))))
 
+(use-package switch-window
+   :config
+   (setq switch-window-input-style 'minibuffer)
+   (setq switch-window-increase 4)
+   (setq switch-window-threshold 2)
+   (setq switch-window-shortcut-style 'qwerty)
+   (setq switch-window-qwerty-shortcuts
+         '("a" "s" "d" "f" "j" "k" "l"))
+   (setq switch-window-minibuffer-shortcut ?z)
+   :bind
+   ([remap other-window] . switch-window))
+
 (use-package popper
   :ensure t ; or :straight t
   :bind (("C-¿"   . popper-toggle-latest)
@@ -425,12 +444,19 @@ one, an error is signaled."
 
 (elpaca (screenshot :host github :repo "tecosaur/screenshot"))
 
+(use-package denote)
+
 (setq org-hide-emphasis-markers t
       org-pretty-entities t
       org-ellipsis "…"
       org-auto-align-tags nil
       org-tags-column 0
       org-insert-heading-respect-content t)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((python . t)
+   (C      . t)))
 
 (use-package toc-org
   :commands toc-org-enable
@@ -787,15 +813,25 @@ targets."
   (python-ts-mode . eglot-ensure)
   (rust-ts-mode . eglot-ensure))
 
+(use-package rustic)
+(setq rustic-lsp-client 'eglot)
+
+;(use-package gptel
+;  :config
+;  (let* ((open-ai-auth (car (auth-source-search :host "OpenAI"))))
+;    (setq gptel-api-key (plist-get open-ai-auth :api_key))))
+
+(add-hook 'prog-mode-hook 'toggle-truncate-lines)
+
+(use-package markdown-mode)
+
 (setq read-process-output-max (* 3 1024 1024)) ;; 1mb
 (setq gc-cons-threshold 100000000)
-
-(elpaca (breadcrumb :host github :repo "joaotavora/breadcrumb"))
-(add-hook 'eglot-managed-mode-hook #'breadcrumb-mode)
 
 (use-package eldoc-box)
 (setq eldoc-box-max-pixel-height 300)
 (setq eldoc-box-max-pixel-width 500)
+(setq eldoc-echo-area-use-multiline-p nil)
 
 (use-package haskell-mode)
 
