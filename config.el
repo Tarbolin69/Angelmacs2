@@ -69,8 +69,12 @@
   (general-evil-setup)
 
   (general-define-key ;; Just a better way to escape stuff
-    "<escape>" 'keyboard-escape-quit)  
+    "<escape>" 'keyboard-escape-quit)
 
+  (general-define-key
+   "S-<return>" 'newline-without-break-of-line
+   "C-<return>" 'newline-above-without-break-of-line)
+  
   (general-create-definer angl/leader-keys
      :states '(normal insert visual emacs)
      :keymaps 'override
@@ -844,3 +848,18 @@ targets."
 
 (add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-ts-mode)
                               '("\\.py\\'" . python-ts-mode))
+
+(defun newline-without-break-of-line ()
+"Insert a new line below the pointer and indent it"
+  (interactive)
+  (let ((oldpos (point)))
+    (end-of-line) 
+    (newline-and-indent)))
+
+(defun newline-above-without-break-of-line ()
+"Insert a new line above the pointer and indent it"
+  (interactive)
+  (let ((oldpos (point)))
+    (forward-line -1)
+    (end-of-line)
+    (newline-and-indent)))
