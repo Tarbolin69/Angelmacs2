@@ -1,6 +1,9 @@
 .cache/
 *~
 .tutor/
+eshell/
+projects
+undo/
 auto-save-list/
 eln-cache/
 elpa/
