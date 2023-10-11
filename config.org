@@ -165,11 +165,25 @@
   (general-define-key ;; Just a better way to escape stuff
     "<escape>" 'keyboard-escape-quit)
 
-  (general-define-key
+  (general-define-key ;; All my own functions live here
    "S-<return>" 'newline-without-break-of-line
    "C-<return>" 'newline-above-without-break-of-line)
+
+  (general-create-definer svl/leader-keys ;; This one is for Emacs bindings
+    :keymaps 'override
+    :prefix "C-c")
+
+  (svl/leader-keys
+    "n" '(:ignore t :wk "Denote actions")
+    "nn" '(denote :wk "Create note")
+    "no" '(denote-open-or-create :wk "Open denote file")
+    "nr" '(denote-rename-file :wk "Rename denote file")
+    "ni" '(denote-insert-link :wk "Insert denote link")
+    "nl" '(denote-add-links :wk "Add denote links - REGEX")
+    "nb" '(denote-backlinks :wk "Show denote backlinks")
+    "nf" '(denote-find-link :wk "Find denote link in buffer"))
   
-  (general-create-definer angl/leader-keys
+  (general-create-definer angl/leader-keys ;; This one is for vim bindings
      :states '(normal insert visual emacs)
      :keymaps 'override
      :prefix "SPC"
