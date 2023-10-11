@@ -173,6 +173,8 @@
     :keymaps 'override
     :prefix "C-c")
 
+;; The idea here is to slowly transition from SPC to C-c and use Emacs bindings
+  
   (svl/leader-keys
     "n" '(:ignore t :wk "Denote actions")
     "nn" '(denote :wk "Create note")
